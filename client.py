@@ -8,7 +8,6 @@ import nacl.utils
 import nacl.pwhash
 import os
 import base64
-
 group_key={}
 
 def keyGen(password,groupname):
@@ -129,7 +128,7 @@ def send(username):
             command, msg = msg.split(maxsplit=1)
             server.sendall(bytes(command,'utf-8'))
             details = server.recv(1024).decode("utf-8")
-            peername , portno = details.split(":")
+            peername , port_no = details.split(":")
 
             if 'file' in msg: #ruchi file a.txt
                 isFile = True
@@ -137,12 +136,12 @@ def send(username):
                 header = username+ ' file ' + filename+'\n\n' #file a.txt\n\n
                 if isFile == True:	
                     header = header.encode()	
-                    msg_peer(portno,header,filename,isFile)
+                    msg_peer(port_no,header,filename,isFile)
                     
             else:
                 header = "  "	
                 message = "\n-----------\n" + username + ':"' + msg + '"\n-----------\n'	
-                msg_peer(portno,header,message,isFile)
+                msg_peer(port_no,header,message,isFile)
 
         elif(command=="create"):
             server.sendall(bytes(str(command) + " " + str(msg),'utf-8'))
@@ -203,20 +202,14 @@ def send(username):
             if secret_msg.startswith("file"):
                 filename=secret_msg.split()[1]
                 server.sendall(bytes(str(command) + " "+ str(gname) +" "+"file "+str(filename),'utf-8'))
-                b = os.path.getsize(filename)
-                server.sendall(str(b).encode())
-                with open(filename, "rb") as F:
-                    content = F.read(1024)
-                    while(content):
-                        server.sendall(content)
-                        content = F.read(1024)
-                        
-                    
-                    
-                #server.send(bytes("bye".encode()))
-                # server.sendall(content)
-                #details = server.recv(1024).decode()
-
+                ports = server.recv(1024).decode('utf-8')
+                ports = (ports.split("  ")[0]).split(" ")
+                global portno
+                port_numbers = [int(x) for x in ports if int(x) != int(portno)]
+                header = gname + ":" + username+ ' file ' + filename+'\n\n' #file a.txt\n\n
+                header = header.encode()	
+                for each in port_numbers:
+                    msg_peer(each,header,filename,True)
 
             else:
                 encrypted = groupMsgGen(secret_msg,gname)

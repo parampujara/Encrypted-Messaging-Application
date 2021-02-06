@@ -67,28 +67,16 @@ def rcv(client,username):
                 if "file" in msg:
                     
                     grpname,txt,filename=msg.split(maxsplit=2)
-                    
-                    filecontent=None
-                    newfilename= "new_"+filename
-                    filesize = int(client.recv(1024).decode())
-                    
-                    aa=client.recv(filesize)
-                    print(filesize,aa)
-                    with open(newfilename,"wb") as F:
-                        F.write(aa)
-                        
-
-                    i=0
-                    #groupname = msg.split(maxsplit=1)[0] 
+                    #
                     for i in range(len(Group_lists)):
                         if(Group_lists[i].group_name==grpname):
-                            if username in Group_lists[i].members:
-                                send1("group",username,grpname,filecontent,True,newfilename) 
-                                #client.send("Message sent without encryption".encode())
-                                print("***********Message sent****************")
-                            else:
-                                #client.send("You are not part of the group".encode())
-                                pass    
+                            port = ""
+                            for each in Group_lists[i].members:
+                                port += str(Username_and_Port[each]) + " "
+                    port = pad(port)
+                    client.send(bytes(port,'utf-8'))
+                    #
+                       
                 else:    
                     i=0
                     groupname=msg.split(maxsplit=1)[0]
